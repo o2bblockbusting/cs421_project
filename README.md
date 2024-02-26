@@ -1,2 +1,5 @@
 # cs421_project
-Lexer for a new language
+This project is a lexer for a new language called Sulfur. The lexer can convert sulfur source code into a list of tokens, that will be made executable in later portions of the project. Sulfur's main selling point is that most common programming symbols are now expressed using a single capital letter. See 'tokens.txt' in the docs folder to get an idea of what each letter stands for. Variables are made up of lowercase letters, underscores, and numbers as long as they do not start with a number. Sulfur code is meant to sacrifice some readability for compactness, while also abandoning all meaning that whitespace has. Check out the examples in the examples folder to see some Sulfur code, or check the wiki to start learning.
+
+# Tools Used
+The lexer is written in Java and instead of using a lexical analyzer generator, it relies on the Java regular expressions library to have more direct control over how the language is tokenized. Also, a lexical analyzer generator adds an extra layer of complexity that is not necessary in an already complex project.
