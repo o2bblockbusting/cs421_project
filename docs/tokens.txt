@@ -9,7 +9,7 @@ G Float_T
 H CURRENTLY UNUSED
 I If
 J Jump Out
-K CURRENTLY UNUSED
+K Kontinue
 L Long_T
 M Monologue
 N Int

@@ -3,7 +3,7 @@ import java.util.HashMap;
 public enum TokenType {
 	// Single alpha character tokens.
 	ASSIGN('A'), BOOLEAN_T('B'), CHARACTER_T('C'), DOUBLE_T('D'), ELSE('E'), FUNCTION('F'), FLOAT_T('G'), H_UNUSED('H'), IF('I'), JUMP_OUT('J'),
-	K_UNUSED('K'), LONG_T('L'), MONOLOGUE('M'), INTEGER_T('N'), OBJECT_T('O'), PRINT('P'), QUIT('Q'), RETURN('R'), STRING_T('S'), TRUE('T'), UNTRUE('U'), 
+	KONTINUE('K'), LONG_T('L'), MONOLOGUE('M'), INTEGER_T('N'), OBJECT_T('O'), PRINT('P'), QUIT('Q'), RETURN('R'), STRING_T('S'), TRUE('T'), UNTRUE('U'), 
 	VALUE('V'), WHILE('W'), EXECUTE('X'), YET('Y'), ZENITH('Z'), 
 	
 	// Symbol tokens
