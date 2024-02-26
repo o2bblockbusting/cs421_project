@@ -1,24 +1,22 @@
-a8080vn2
+AnumNV2
 
-w8080<vn100y
-a17vbt
-a777vn2
+Wnum<100Y
+Ais_primeBVT
+AdivisorNV2
 
-w777<8080y
+Wdivisor<numY
 
-i8080%777=vn2y
-a17vbu
-e
-z
+Inum%divisor=2Y
+Ais_primeBVU
+J
+Z
 
-a777v777+1
-z
+AdivisorNVdivisor+1
+Z
 
-i17y
-pv8080
-ps"\n"
-z
-a8080v8080+1
-z
-
-A_test_
+Iis_primeY
+P(num)
+P("\n")
+Z
+AnumNVnum+1
+Z

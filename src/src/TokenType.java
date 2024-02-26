@@ -2,15 +2,20 @@ import java.util.HashMap;
 
 public enum TokenType {
 	// Single alpha character tokens.
-	ASSIGN('A'), BOOLEAN('B'), CHARACTER('C'), DOUBLE('D'), ESCAPE('E'), FUNCTION('F'), FLOAT('G'), H_UNUSED('H'), IF('I'), J_UNUSED('J'),
-	K_UNUSED('K'), LONG('L'), MONOLOGUE('M'), INTEGER('N'), OBJECT('O'), PRINT('P'), QUIT('Q'), RETURN('R'), STRING('S'), TRUE('T'), UNTRUE('U'), 
+	ASSIGN('A'), BOOLEAN_T('B'), CHARACTER_T('C'), DOUBLE_T('D'), ELSE('E'), FUNCTION('F'), FLOAT_T('G'), H_UNUSED('H'), IF('I'), JUMP_OUT('J'),
+	K_UNUSED('K'), LONG_T('L'), MONOLOGUE('M'), INTEGER_T('N'), OBJECT_T('O'), PRINT('P'), QUIT('Q'), RETURN('R'), STRING_T('S'), TRUE('T'), UNTRUE('U'), 
 	VALUE('V'), WHILE('W'), EXECUTE('X'), YET('Y'), ZENITH('Z'), 
 	
 	// Symbol tokens
 	NOT('!'), AND('&'), OR('|'), MODULUS('%'), ADD('+'), SUB('-'), MULTIPLY('*'), DIVIDE('/'), EQUALITY('='), LESS_THAN('<'), GREATER_THAN('>'),
+	LEFT_PAREN('('), RIGHT_PAREN(')'), LEFT_BRACKET('['), RIGHT_BRACKET(']'), LEFT_BRACE('{'), RIGHT_BRACE('}'),
+	SEPARATOR(','), PROPERTY_ACCESSOR('~'), 
+	
+	// Data Types
+	BOOLEAN, CHARACTER('\''), DOUBLE, FLOAT, LONG, INTEGER, STRING('"'),
 	
 	// Special
-	IDENTIFIER, EOF;
+	NUMBER, IDENTIFIER, EOF;
 	
 	private char tokenChar;
 	private static final HashMap<Character, TokenType> charMap = new HashMap<>();
@@ -29,8 +34,13 @@ public enum TokenType {
 			if(t.tokenChar != (char) 127)
 				charMap.put(t.tokenChar, t);
 		}
-		for(char c = '0'; c <= '9'; c++) {
+		for(char c = 'a'; c <= 'z'; c++) {
 			charMap.put(c, IDENTIFIER);
+		}
+		charMap.put('_', IDENTIFIER);
+		
+		for(char c = '0'; c <= '9'; c++) {
+			charMap.put(c, NUMBER);
 		}
 	}
 	

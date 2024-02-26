@@ -1,0 +1,16 @@
+M# My program #M
+
+AnumNV28
+
+M# Important variable #M
+ApiDV3.14159*2.3
+
+M# Logic section 
+   Does stuff
+#M 
+
+Inum/pi>5Y
+P("YES")
+ZEY
+P("NO")
+Z

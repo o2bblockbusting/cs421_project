@@ -1,85 +1,62 @@
-a assign
-b boolean
-c char
-d double
-e escape
-f function
-g float
-h 
-i if
-j jump???
-k 
-l long
-m monologue
-n int
-o object???
-p print
-q quit
-r return
-s string
-t true
-u untrue
-v value
-w while
-x execute
-y yet
-z zenith
-! not
-@ append???
+[a-z_] Identifier
+A Assign
+B Boolean_T
+C Char_T
+D Double_T
+E Else
+F Function
+G Float_T
+H CURRENTLY UNUSED
+I If
+J Jump Out
+K CURRENTLY UNUSED
+L Long_T
+M Monologue
+N Int
+O Object???
+P Print
+Q Quit
+R Return
+S String_T
+T True
+U Untrue
+V Value
+W While
+X Execute
+Y Yet
+Z Zenith
+! Not
+@ Append???
 #
-$ format???
-% modulus
+$ Format???
+% Modulus
 ^ 
-& and
-* multiply
-(
-)
-- sub
-= test equality
-_ variable??
-+ addition
-< less than
-> greater than
+& And
+* Multiply
+( Left Parenthesis
+) Right Parenthesis
+- Sub
+= Test Equality
+_ Identifier
++ Addition
+< Less Than
+> Greater Than
 ? 
-, 
-. decimal for double/float
+, Separator
+. Decimal For Double/float
 /
 :
 ;
-" str
-' char
-[ arr?
-] arr?
+" String
+' Char
+[ Arr?
+] Arr?
 {
 }
-~
+~ Property Accessor
 `
-| or
-\ ESC seq
+| Or
+\ Esc Seq
 
 
-long l, int n, double d, float g, string s, char c, bool b
-
-
-a8080vn2
-
-w8080<vn100y
-a17vbt
-a777vn2
-
-w777<8080y
-
-i8080%777=vn2y
-a17vbu
-e
-z
-
-a777v777+1
-z
-
-i17y
-pv8080
-ps"\n"
-z
-a8080v8080+1
-z
+Long L, Int N, Double D, Float G, String S, Char C, Bool B

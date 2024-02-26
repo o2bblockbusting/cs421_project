@@ -13,7 +13,7 @@ public class Lexer {
 	
 	public static void main(String[] args) {
 		StringBuilder code = new StringBuilder();
-		File f = new File("C:\\Users\\pc\\vscode-workspace\\CS421\\cs421_project\\example\\primefinder.suf");
+		File f = new File("C:\\Users\\pc\\vscode-workspace\\CS421\\cs421_project\\example\\array.suf");
 		Scanner scan;
 		try {
 			scan = new Scanner(f);
@@ -51,7 +51,7 @@ public class Lexer {
 		Pattern whitespacePattern = Pattern.compile("\\s");
 		
 		while(idx < codeStr.length()) {
-			char c = Character.toUpperCase(codeStr.charAt(idx));
+			char c = codeStr.charAt(idx);
 			
 			// Ignore and skip over whitespace
 			Matcher matcher = whitespacePattern.matcher(codeStr.substring(idx, idx+1));
@@ -67,21 +67,18 @@ public class Lexer {
 			// Find token that matches the given character or throw an error
 			TokenType tType = TokenType.getTokenType(c);
 			if(tType == null) {
-				System.out.println("Error on line "+lineNum+": Unrecognized character '"+c+"'");
-				System.exit(1);
+				throwError("UNEXPECTED");
 			}
 			
 			switch(tType) {
-			case INTEGER:
-			case LONG:
-				getInteger(tType);
+			case NUMBER:
+				getNumber();
 				break;
-			case DOUBLE:
-			case FLOAT:
-				getFloat(tType);
+			case TRUE:
+				tokenList.add(new Token(TokenType.BOOLEAN, true));
 				break;
-			case BOOLEAN:
-				getBoolean(tType);
+			case UNTRUE:
+				tokenList.add(new Token(TokenType.BOOLEAN, false));
 				break;
 			case STRING:
 				getString();
@@ -91,6 +88,9 @@ public class Lexer {
 				break;
 			case IDENTIFIER:
 				getIdentifier();
+				break;
+			case MONOLOGUE:
+				removeComment();
 				break;
 			default:
 				tokenList.add(new Token(tType));
@@ -102,10 +102,25 @@ public class Lexer {
 		return tokenList;
 	}
 	
-	// Finds and creates a token from a string of digits that act as an identifier
-	// Yes, this language is cursed
+	// Removes a comment that is in the form M# COMMENT #M
+	private void removeComment() {
+		Pattern pattern = Pattern.compile("[Mm]#.*?#[Mm]", Pattern.DOTALL);
+		Matcher matcher = pattern.matcher(codeStr.substring(idx));
+		boolean matchFound = matcher.find();
+		
+		if(matchFound) {
+			idx += matcher.end() - 1;
+			lineNum += matcher.group().lines().count()-1;
+		}
+		else {
+			throwError("COMMENT");
+		}
+	}
+	
+	// Finds and creates a token from a string of lowercase letters, underscores, and numbers
+	// Cannot start with a number
 	private void getIdentifier() {
-		Pattern pattern = Pattern.compile("\\d+");
+		Pattern pattern = Pattern.compile("[a-z_][a-z0-9_]*");
 		Matcher matcher = pattern.matcher(codeStr.substring(idx));
 		boolean matchFound = matcher.find();
 		
@@ -122,7 +137,7 @@ public class Lexer {
 	// Finds a character enclosed in single quotes and adds it as a token to the list
 	private void getCharacter() {
 		Pattern pattern = Pattern.compile("'\\\\?.'");
-		Matcher matcher = pattern.matcher(codeStr.substring(++idx));
+		Matcher matcher = pattern.matcher(codeStr.substring(idx));
 		boolean matchFound = matcher.find();
 		
 		if(matchFound) {
@@ -137,8 +152,8 @@ public class Lexer {
 
 	// Finds a string enclosed in double quotes and adds it as a token to the list
 	private void getString() {
-		Pattern pattern = Pattern.compile("\"([^\"]|\\\")+\"");
-		Matcher matcher = pattern.matcher(codeStr.substring(++idx));
+		Pattern pattern = Pattern.compile("\"([^\"]|\\\\\")*\"");
+		Matcher matcher = pattern.matcher(codeStr.substring(idx));
 		boolean matchFound = matcher.find();
 		
 		if(matchFound) {
@@ -151,150 +166,61 @@ public class Lexer {
 		}
 	}
 	
-	// Finds a boolean (T or U) following the letter B
-	// Adds the correct token to the list
-	private void getBoolean(TokenType type) {
-		idx++;
-		if(idx < codeStr.length()) {
-			switch(codeStr.charAt(idx)) {
-			case 'T':
-			case 't':
-				tokenList.add(new Token(type, true));
-				break;
-			case 'U':
-			case 'u':
-				tokenList.add(new Token(type, false));
-				break;
-			default:
-				throwError("BOOLEAN");
-				break;
-			}
-		}
-		else {
-			throwError("EOF");
+	// Finds a number of type int, long, float, or double and adds the corresponding token to the list
+	private void getNumber() {
+		if(!getFloat() && !getInteger()) {
+			throwError("NUMBER");
 		}
 	}
 	
-	// Finds an integer following the letter N or L
-	// Converts the value from a string, puts it in a token, and adds the token to the list
-	private void getInteger(TokenType type) {
-		Pattern pattern = Pattern.compile("[+-]?\\d+");
-		Matcher matcher = pattern.matcher(codeStr.substring(++idx));
+	// Finds and converts an integer value from a string, puts it in a token, and adds the token to the list
+	private boolean getInteger() {
+		Pattern pattern = Pattern.compile("\\d+[NL]?");
+		Matcher matcher = pattern.matcher(codeStr.substring(idx));
 		boolean matchFound = matcher.find();
 		
 		if(matchFound) {
 			try {
-				if(type == TokenType.INTEGER) {
-					tokenList.add(new Token(type, Integer.parseInt(matcher.group())));
+				//Default to int if not specified as a long using 'L'
+				if(!matcher.group().endsWith("L")) {
+					tokenList.add(new Token(TokenType.INTEGER, Integer.parseInt(matcher.group())));
 				}
 				else {
-					tokenList.add(new Token(type, Long.parseLong(matcher.group())));
+					tokenList.add(new Token(TokenType.LONG, Long.parseLong(matcher.group())));
 				}
 			} catch(NumberFormatException e) {
 				throwError("INTEGER");
 			}
 			idx += matcher.end() - 1;
+			return true;
 		}
-		else {
-			throwError("INTEGER");
-		}
-		
-		/*int i = ++idx;
-		
-		// Move past + or - if present
-		char c = codeStr.charAt(i);
-		if(i < codeStr.length() && (c == '-' || c == '+')) {
-			i++;
-		}
-		
-		// Find end of digit sequence
-		while(i < codeStr.length() && isDigit(codeStr.charAt(i))) {
-			i++;
-		}
-		
-		// Convert from string to number and stop if an error occurs
-		String intStr = codeStr.substring(idx, i);
-		Token t = null;
-		
-		try {
-			if(type == TokenType.INTEGER) {
-				t = new Token(type, Integer.parseInt(intStr));
-			}
-			else {
-				t = new Token(type, Long.parseLong(intStr));
-			}
-		} catch(NumberFormatException e) {
-			System.out.println("Error on line "+lineNum+": Invalid integer value.");
-			System.exit(1);
-		}
-		return t;*/
+		return false;
 	}
 	
 	// Finds a float/double following the letter G or D
 	// Converts the value from a string, puts it in a token, and adds the token to the list
-	private void getFloat(TokenType type) {
-		Pattern pattern = Pattern.compile("[+-]?(\\d+\\.\\d+([Ee]\\d+)?)");
-		Matcher matcher = pattern.matcher(codeStr.substring(++idx));
+	// Returns whether or not it succeeds
+	private boolean getFloat() {
+		Pattern pattern = Pattern.compile("(\\d+\\.\\d+([Ee]\\d+)?)[DG]?");
+		Matcher matcher = pattern.matcher(codeStr.substring(idx));
 		boolean matchFound = matcher.find();
 		
 		if(matchFound) {
 			try {
-				if(type == TokenType.FLOAT) {
-					tokenList.add(new Token(type, Float.parseFloat(matcher.group())));
+				//Default to double unless specified with an 'F' for float
+				if(matcher.group().endsWith("F")) {
+					tokenList.add(new Token(TokenType.FLOAT, Float.parseFloat(matcher.group())));
 				}
 				else {
-					tokenList.add(new Token(type, Double.parseDouble(matcher.group())));
+					tokenList.add(new Token(TokenType.DOUBLE, Double.parseDouble(matcher.group())));
 				}
 			} catch(NumberFormatException e) {
 				throwError("FLOAT");
 			}
 			idx += matcher.end() - 1;
+			return true;
 		}
-		else {
-			throwError("FLOAT");
-		}
-		/*
-		int i = ++idx;
-		boolean dotFound = false;
-		
-		// Move past + or - if present
-		char c = codeStr.charAt(i);
-		if(i < codeStr.length() && (c == '-' || c == '+')) {
-			i++;
-		}
-		
-		// Find end of digit sequence
-		while(i < codeStr.length()) {
-			char c = codeStr.charAt(i);
-			if(c == '.') {
-				if(dotFound) {
-					System.out.println("Error on line "+lineNum+": Invalid floating point value. Float cannot have two decimals.");
-					System.exit(1);
-				}
-				dotFound = true;
-			}
-			else if(!isDigit(c)) {
-				break;
-			}
-			i++;
-		}
-		
-		// Convert from string to number and stop if an error occurs
-		String numStr = codeStr.substring(idx, i);
-		Token t = null;
-		
-		try {
-			if(type == TokenType.FLOAT) {
-				t = new Token(type, Float.parseFloat(numStr));
-			}
-			else {
-				t = new Token(type, Double.parseDouble(numStr));
-			}
-		} catch(NumberFormatException e) {
-			System.out.println("Error on line "+lineNum+": Invalid floating point value.");
-			System.exit(1);
-		}
-		return t;*/
+		return false;
 	}
 	
 	private void throwError(String errName) {
@@ -304,11 +230,8 @@ public class Lexer {
 		case "EOF":
 			errString += "Unexpected end of file character.";
 			break;
-		case "FLOAT":
-			errString += "Invalid floating point value.";
-			break;
-		case "INTEGER":
-			errString += "Invalid integer value.";
+		case "NUMBER":
+			errString += "Invalid number sequence.";
 			break;
 		case "BOOLEAN":
 			errString += "Invalid boolean value. Valid options are 'T' or 'U'.";
@@ -322,11 +245,21 @@ public class Lexer {
 		case "IDENTIFIER":
 			errString += "Invalid identifier.";
 			break;
+		case "COMMENT":
+			errString += "Unclosed comment.";
+			break;
+		case "UNEXPECTED":
+			errString += "Unexpected character '"+codeStr.charAt(idx)+"'.";
+			break;
 		default:
 			errString += "Unknown error.";
 			break;
 		}
 		System.out.println(errString);
+		System.out.println(codeStr.substring(idx));
+		for(Token t : tokenList) {
+			System.out.println(t);
+		}
 		System.exit(1);
 	}
 }
