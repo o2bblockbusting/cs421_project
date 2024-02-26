@@ -9,15 +9,15 @@ P("4+2: ")
 P(add(4,2))
 P('\n')
 
-M# Fibonacci function is recursive, takes an int as an argument and returns a long #M
-AfibFLV(Nx)Y
+M# Factorial function is recursive, takes an int as an argument and returns a long #M
+AfacFLV(Nx)Y
 Ix=0|x=1Y
 R1
 ZEY
-Rx*fib(x-1)
+Rx*fac(x-1)
 Z
 Z
 
-P("Fibonacci of 7: ")
-P(fib(7))
+P("Factorial of 7: ")
+P(fac(7))
 P('\n')
