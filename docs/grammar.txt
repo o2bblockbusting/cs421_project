@@ -1,5 +1,8 @@
 program        → block
-block          → assignment | while | if | function_call | print | return 
+
+block          → statement+
+
+statement      → assignment | while | if | function_call | print | return | break | continue | quit
 
 assignment	   → ("A" IDENTIFIER TYPE "V" comparison1) | function_def
 
@@ -14,6 +17,12 @@ function_call  → IDENTIFIER "(" (comparison1)? ("," comparison1)* ")"
 print          → "P(" (comparison1)? ("," comparison1)* ")"
 
 return         → "R" comparison1
+
+break          → "J"
+
+continue       → "K"
+
+quit           → "Q"
 
 
 

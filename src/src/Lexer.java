@@ -81,6 +81,7 @@ public class Lexer {
 			idx++;
 		}
 		
+		tokenList.add(new Token(TokenType.EOF, lineNum));
 		return tokenList;
 	}
 	

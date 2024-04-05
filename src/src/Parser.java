@@ -17,7 +17,7 @@ public class Parser {
 	
 	public Expr parse() {
 		Expr exp = block();
-		if(current < tokens.size()) {
+		if(current < tokens.size() && peek().type != TokenType.EOF) {
 			error(peek(),"Invalid statement");
 		}
 		return exp;
@@ -38,6 +38,8 @@ public class Parser {
 				statements.add(funcCall());
 			} else if(match(TokenType.RETURN)) {
 				statements.add(new Expr.ReturnStmt(comparison1()));
+			} else if(match(TokenType.JUMP_OUT, TokenType.KONTINUE, TokenType.QUIT)) {
+				statements.add(new Expr.FlowControlStmt(previous()));
 			} else {
 				break; 
 			}
@@ -161,13 +163,12 @@ public class Parser {
 	// Rule: comparison1 → comparison2 ( "|" comparison2 )*
 	private Expr comparison1() {
 		Expr left = comparison2();
-
+		
 		while (match(TokenType.OR)) {
 			Token operator = previous();
 			Expr right = comparison2();
 			left = new Expr.BinaryOp(left, operator, right);
 		}
-
 		return left;
 	}
 	

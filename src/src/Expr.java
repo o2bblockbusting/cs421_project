@@ -102,6 +102,19 @@ public abstract class Expr {
 		}
 	}
 	
+	// For break, continue, and quit
+	public static class FlowControlStmt extends Expr {
+		final Token ctrlTok;
+		FlowControlStmt(Token ctrlTok) {
+			this.ctrlTok = ctrlTok;
+		}
+		
+		@Override
+		public String toString() {
+			return "FLOW_CTRL-"+ctrlTok.type.name();
+		}
+	}
+	
 	public static class IfStatement extends Expr {
 		final Expr condition;
 		final StatementBlock block;
@@ -110,7 +123,7 @@ public abstract class Expr {
 		IfStatement(Expr condition, StatementBlock block, StatementBlock elseBlock) {
 			this.condition = condition;
 			this.block = block;
-			this.elseBlock = block;
+			this.elseBlock = elseBlock;
 		}
 		
 		@Override
