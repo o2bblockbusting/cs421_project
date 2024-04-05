@@ -1,7 +1,4 @@
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,31 +7,6 @@ public class Lexer {
 	private int idx = 0;
 	private int lineNum = 1;
 	private final String codeStr;
-	
-	public static void main(String[] args) {
-		StringBuilder code = new StringBuilder();
-		File f = new File("C:\\Users\\pc\\vscode-workspace\\CS421\\cs421_project\\example\\array.suf");
-		Scanner scan;
-		try {
-			scan = new Scanner(f);
-		} catch (FileNotFoundException e) {
-			System.out.println("Error: File not found.");
-			System.exit(1);
-			scan = null;
-		}
-		
-		while(scan.hasNextLine()) {
-			code.append(scan.nextLine());
-			code.append('\n');
-		}
-		scan.close();
-		
-		//System.out.println(code.toString());
-		
-		Lexer lexr = new Lexer(code.toString());
-		ArrayList<Token> tokenList = lexr.lex();
-		tokenList.forEach((token) -> System.out.println(token));
-	}
 	
 	public Lexer(String codeStr) {
 		this.codeStr = codeStr;
@@ -75,10 +47,10 @@ public class Lexer {
 				getNumber();
 				break;
 			case TRUE:
-				tokenList.add(new Token(TokenType.BOOLEAN, true));
+				tokenList.add(new Token(TokenType.BOOLEAN, true, lineNum));
 				break;
 			case UNTRUE:
-				tokenList.add(new Token(TokenType.BOOLEAN, false));
+				tokenList.add(new Token(TokenType.BOOLEAN, false, lineNum));
 				break;
 			case STRING:
 				getString();
@@ -92,8 +64,18 @@ public class Lexer {
 			case MONOLOGUE:
 				removeComment();
 				break;
+			case LESS_THAN:
+			case GREATER_THAN:
+			case NOT:
+				// Handle 2 character "less/greater than or equal to" or "not equal to" tokens
+				if(codeStr.length() > idx+1 && codeStr.charAt(idx+1) == '=') {
+					idx++;
+					tType = (tType == TokenType.LESS_THAN) ? TokenType.LT_EQ : (tType == TokenType.GREATER_THAN ? TokenType.GT_EQ : TokenType.NOT_EQ);
+				}
+				tokenList.add(new Token(tType, lineNum));
+				break;
 			default:
-				tokenList.add(new Token(tType));
+				tokenList.add(new Token(tType, lineNum));
 				break;
 			}
 			idx++;
@@ -126,7 +108,7 @@ public class Lexer {
 		
 		if(matchFound) {
 			// Remember to strip single quotes from character before adding it
-			tokenList.add(new Token(TokenType.IDENTIFIER, matcher.group()));
+			tokenList.add(new Token(TokenType.IDENTIFIER, matcher.group(), lineNum));
 			idx += matcher.end() - 1;
 		}
 		else {
@@ -142,7 +124,7 @@ public class Lexer {
 		
 		if(matchFound) {
 			// Remember to strip single quotes from character before adding it
-			tokenList.add(new Token(TokenType.CHARACTER, matcher.group().substring(1, matcher.group().length()-1).translateEscapes().charAt(0)));
+			tokenList.add(new Token(TokenType.CHARACTER, matcher.group().substring(1, matcher.group().length()-1).translateEscapes().charAt(0), lineNum));
 			idx += matcher.end() - 1;
 		}
 		else {
@@ -158,7 +140,7 @@ public class Lexer {
 		
 		if(matchFound) {
 			// Remember to strip double quotes from string before adding it
-			tokenList.add(new Token(TokenType.STRING, matcher.group().substring(1, matcher.group().length()-1).translateEscapes()));
+			tokenList.add(new Token(TokenType.STRING, matcher.group().substring(1, matcher.group().length()-1).translateEscapes(), lineNum));
 			idx += matcher.end() - 1;
 		}
 		else {
@@ -183,10 +165,10 @@ public class Lexer {
 			try {
 				//Default to int if not specified as a long using 'L'
 				if(!matcher.group().endsWith("L")) {
-					tokenList.add(new Token(TokenType.INTEGER, Integer.parseInt(matcher.group())));
+					tokenList.add(new Token(TokenType.INTEGER, Integer.parseInt(matcher.group()), lineNum));
 				}
 				else {
-					tokenList.add(new Token(TokenType.LONG, Long.parseLong(matcher.group())));
+					tokenList.add(new Token(TokenType.LONG, Long.parseLong(matcher.group()), lineNum));
 				}
 			} catch(NumberFormatException e) {
 				throwError("INTEGER");
@@ -209,10 +191,10 @@ public class Lexer {
 			try {
 				//Default to double unless specified with an 'F' for float
 				if(matcher.group().endsWith("F")) {
-					tokenList.add(new Token(TokenType.FLOAT, Float.parseFloat(matcher.group())));
+					tokenList.add(new Token(TokenType.FLOAT, Float.parseFloat(matcher.group()), lineNum));
 				}
 				else {
-					tokenList.add(new Token(TokenType.DOUBLE, Double.parseDouble(matcher.group())));
+					tokenList.add(new Token(TokenType.DOUBLE, Double.parseDouble(matcher.group()), lineNum));
 				}
 			} catch(NumberFormatException e) {
 				throwError("FLOAT");

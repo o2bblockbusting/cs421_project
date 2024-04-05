@@ -26,6 +26,5 @@ Z
 
 Z
 
-M# Cannot have statement by itself, must be prefixed with 'V' if we are not assigning anything #M
-Vcopy(arr,arr_2)
+copy(arr,arr_2)
 P(arr_2[2])

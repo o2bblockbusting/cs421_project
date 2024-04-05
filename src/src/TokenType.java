@@ -11,6 +11,9 @@ public enum TokenType {
 	LEFT_PAREN('('), RIGHT_PAREN(')'), LEFT_BRACKET('['), RIGHT_BRACKET(']'), LEFT_BRACE('{'), RIGHT_BRACE('}'),
 	SEPARATOR(','), PROPERTY_ACCESSOR('~'), 
 	
+	// Two-char symbols
+	LT_EQ, GT_EQ, NOT_EQ,
+	
 	// Data Types
 	BOOLEAN, CHARACTER('\''), DOUBLE, FLOAT, LONG, INTEGER, STRING('"'),
 	
@@ -19,6 +22,8 @@ public enum TokenType {
 	
 	private char tokenChar;
 	private static final HashMap<Character, TokenType> charMap = new HashMap<>();
+	public static final TokenType[] dataTypeTokens = new TokenType[] {TokenType.BOOLEAN_T, TokenType.CHARACTER_T, TokenType.DOUBLE_T, TokenType.FLOAT_T, TokenType.INTEGER_T, TokenType.LONG_T, TokenType.STRING_T};
+	public static final TokenType[] dataTokens = new TokenType[] {TokenType.BOOLEAN, TokenType.CHARACTER, TokenType.DOUBLE, TokenType.FLOAT, TokenType.INTEGER, TokenType.LONG, TokenType.STRING};
 	
 	private TokenType(char tokenChar) {
 		this.tokenChar = tokenChar;

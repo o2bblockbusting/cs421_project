@@ -1,0 +1,18 @@
+program        → block
+block          → assignment | term 
+
+assignment	   → "A" IDENTIFIER TYPE "V" expression  
+
+term           → factor ( ( "-" | "+" ) factor )* ;
+
+factor         → unary ( ( "/" | "*" ) unary )* ;
+
+unary          → ( "-" ) unary | primary ;
+
+primary        → NUMBER | IDENTIFIER | "(" term ")" ;
+
+
+
+
+
+TYPE is Long L, Int N, Double D, Float G, String S, Char C, Bool B
