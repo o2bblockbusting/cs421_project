@@ -158,7 +158,7 @@ public class Parser {
 		return new Expr.FunctionCall(funcID, arguments);
 	}
 	
-	// Rule: term → term ( "|" term )*
+	// Rule: comparison1 → comparison2 ( "|" comparison2 )*
 	private Expr comparison1() {
 		Expr left = comparison2();
 
@@ -171,7 +171,7 @@ public class Parser {
 		return left;
 	}
 	
-	// Rule: term → term ( "&" term )*
+	// Rule: comparison2 → comparison3 ( "&" comparison3 )*
 	private Expr comparison2() {
 		Expr left = comparison3();
 
@@ -184,7 +184,7 @@ public class Parser {
 		return left;
 	}
 	
-	// Rule: term → term ( ( "<" | ">" | "<=" | ">="  | "=" | "!=" ) term )*
+	// Rule: comparison3 → term ( ( "<" | ">" | "<=" | ">="  | "=" | "!=" ) term )*
 	private Expr comparison3() {
 		Expr left = term();
 

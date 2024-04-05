@@ -1,15 +1,35 @@
 program        → block
-block          → assignment | term 
+block          → assignment | while | if | function_call | print | return 
 
-assignment	   → "A" IDENTIFIER TYPE "V" expression  
+assignment	   → ("A" IDENTIFIER TYPE "V" comparison1) | function_def
+
+function_def   → "A" IDENTIFIER "F" TYPE? "V(" (TYPE IDENTIFIER)? ("," TYPE IDENTIFIER)* ")Y" block "Z"
+
+while          → "W" comparison1 "Y" block "Z"
+
+if             → "I" comparison1 "Y" block "Z" ("E" (if | "Y" block "Z"))?
+
+function_call  → IDENTIFIER "(" (comparison1)? ("," comparison1)* ")"
+
+print          → "P(" (comparison1)? ("," comparison1)* ")"
+
+return         → "R" comparison1
+
+
+
+comparison1    → comparison2 ( "|" comparison2 )*
+
+comparison2    → comparison3 ( "&" comparison3 )*
+
+comparison3    → term ( ( "<" | ">" | "<=" | ">="  | "=" | "!=" ) term )*
 
 term           → factor ( ( "-" | "+" ) factor )* ;
 
-factor         → unary ( ( "/" | "*" ) unary )* ;
+factor         → unary ( ( "/" | "*" | "%") unary )* ;
 
-unary          → ( "-" ) unary | primary ;
+unary          → ("-" | "+" | "!") unary | primary ;
 
-primary        → NUMBER | IDENTIFIER | "(" term ")" ;
+primary        → NUMBER | IDENTIFIER | "( cast_type )" | "(" expression ")" ;
 
 
 
