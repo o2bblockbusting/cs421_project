@@ -1,3 +1,4 @@
+package Sulfur;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -39,10 +40,14 @@ public class Main {
 			}
 			System.out.print(t + " ");
 		}
-		System.out.println("\n/////////// PARSE TREE ///////////");
+		//System.out.println("\n/////////// PARSE TREE ///////////");
 		Parser parser = new Parser(tokenList);
 		Expr res = parser.parse();
-		System.out.println(res);
+		//System.out.println(res);
+		
+		System.out.println("\n/////////// PROGRAM OUTPUT ///////////");
+		Interpreter interpreter = new Interpreter(res);
+		interpreter.run();
 	}
 
 }

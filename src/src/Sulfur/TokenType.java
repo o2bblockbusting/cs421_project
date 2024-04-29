@@ -1,3 +1,4 @@
+package Sulfur;
 import java.util.HashMap;
 
 public enum TokenType {

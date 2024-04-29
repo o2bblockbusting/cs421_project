@@ -1,3 +1,5 @@
+package Sulfur;
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Expr {
@@ -30,12 +32,28 @@ public abstract class Expr {
 		}
 		@Override
 		public String toString() {
-			String s;
-			if(funcIdTok.type == TokenType.PRINT) {
-				s = "PRINT (";
-			} else {
-				s = "CALL "+funcIdTok.value+" WITH ARGS (";
+			String s = "CALL "+funcIdTok.value+" WITH ARGS (";
+			
+			boolean first = true;
+			for(Expr e : arguments) {
+				if(!first) s += ", ";
+				s += e;
+				first = false;
 			}
+			return s + ')';
+		}
+	}
+	
+	public static class PrintStmt extends Expr {
+		final List<Expr> arguments;
+		
+		PrintStmt(List<Expr> arguments) {
+			this.arguments = arguments;
+		}
+		
+		@Override
+		public String toString() {
+			String s = "PRINT (";
 			
 			boolean first = true;
 			for(Expr e : arguments) {
@@ -90,10 +108,12 @@ public abstract class Expr {
 	public static class WhileStatement extends Expr {
 		final Expr condition;
 		final StatementBlock block;
+		final int lineNum;
 		
-		WhileStatement(Expr condition, StatementBlock block) {
+		WhileStatement(Expr condition, StatementBlock block, int lineNum) {
 			this.condition = condition;
 			this.block = block;
+			this.lineNum = lineNum;
 		}
 		
 		@Override
@@ -115,20 +135,34 @@ public abstract class Expr {
 		}
 	}
 	
-	public static class IfStatement extends Expr {
+	public static class ConditionalBlock extends Expr { 
 		final Expr condition;
-		final StatementBlock block;
+		final StatementBlock body;
+		final int lineNum;
+		
+		ConditionalBlock(Expr condition, StatementBlock body, int lineNum) {
+			this.condition = condition;
+			this.body = body;
+			this.lineNum = lineNum;
+		}
+	}
+	
+	public static class IfStatement extends Expr {
+		final ArrayList<ConditionalBlock> conditionalBlocks;
 		final StatementBlock elseBlock;
 		
-		IfStatement(Expr condition, StatementBlock block, StatementBlock elseBlock) {
-			this.condition = condition;
-			this.block = block;
+		IfStatement(ArrayList<ConditionalBlock> conditionalBlocks, StatementBlock elseBlock) {
+			this.conditionalBlocks = conditionalBlocks;
 			this.elseBlock = elseBlock;
 		}
 		
 		@Override
 		public String toString() {
-			String s = "IF (" + condition + ") {\n" + block + "}\n";
+			String s = "IF (" + conditionalBlocks.get(0).condition + ") {\n" + conditionalBlocks.get(0).body + "}\n";
+			for(int i=1; i < conditionalBlocks.size(); i++) {
+				ConditionalBlock elseIf = conditionalBlocks.get(i);
+				s += "ELSE IF (" + elseIf.condition + ") {\n" + elseIf.body + "}\n";
+			}
 			if(elseBlock != null) {
 				s += "ELSE {\n" + elseBlock + "}\n";
 			}

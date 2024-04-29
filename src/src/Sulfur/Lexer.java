@@ -1,3 +1,4 @@
+package Sulfur;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,7 +21,7 @@ public class Lexer {
 			return tokenList;
 		}
 		
-		Pattern whitespacePattern = Pattern.compile("\\s");
+		Pattern whitespacePattern = Pattern.compile("^\\s");
 		
 		while(idx < codeStr.length()) {
 			char c = codeStr.charAt(idx);
@@ -87,7 +88,7 @@ public class Lexer {
 	
 	// Removes a comment that is in the form M# COMMENT #M
 	private void removeComment() {
-		Pattern pattern = Pattern.compile("[Mm]#.*?#[Mm]", Pattern.DOTALL);
+		Pattern pattern = Pattern.compile("^[M]#.*?#[M]", Pattern.DOTALL);
 		Matcher matcher = pattern.matcher(codeStr.substring(idx));
 		boolean matchFound = matcher.find();
 		
@@ -103,7 +104,7 @@ public class Lexer {
 	// Finds and creates a token from a string of lowercase letters, underscores, and numbers
 	// Cannot start with a number
 	private void getIdentifier() {
-		Pattern pattern = Pattern.compile("[a-z_][a-z0-9_]*");
+		Pattern pattern = Pattern.compile("^[a-z_][a-z0-9_]*");
 		Matcher matcher = pattern.matcher(codeStr.substring(idx));
 		boolean matchFound = matcher.find();
 		
@@ -119,7 +120,7 @@ public class Lexer {
 	
 	// Finds a character enclosed in single quotes and adds it as a token to the list
 	private void getCharacter() {
-		Pattern pattern = Pattern.compile("'\\\\?.'");
+		Pattern pattern = Pattern.compile("^'\\\\?.'");
 		Matcher matcher = pattern.matcher(codeStr.substring(idx));
 		boolean matchFound = matcher.find();
 		
@@ -135,7 +136,7 @@ public class Lexer {
 
 	// Finds a string enclosed in double quotes and adds it as a token to the list
 	private void getString() {
-		Pattern pattern = Pattern.compile("\"([^\"]|\\\\\")*\"");
+		Pattern pattern = Pattern.compile("^\"([^\"]|\\\\\")*\"");
 		Matcher matcher = pattern.matcher(codeStr.substring(idx));
 		boolean matchFound = matcher.find();
 		
@@ -158,7 +159,7 @@ public class Lexer {
 	
 	// Finds and converts an integer value from a string, puts it in a token, and adds the token to the list
 	private boolean getInteger() {
-		Pattern pattern = Pattern.compile("\\d+[NL]?");
+		Pattern pattern = Pattern.compile("^\\d+[NL]?");
 		Matcher matcher = pattern.matcher(codeStr.substring(idx));
 		boolean matchFound = matcher.find();
 		
@@ -166,6 +167,7 @@ public class Lexer {
 			try {
 				//Default to int if not specified as a long using 'L'
 				if(!matcher.group().endsWith("L")) {
+					
 					tokenList.add(new Token(TokenType.INTEGER, Integer.parseInt(matcher.group()), lineNum));
 				}
 				else {
@@ -184,7 +186,7 @@ public class Lexer {
 	// Converts the value from a string, puts it in a token, and adds the token to the list
 	// Returns whether or not it succeeds
 	private boolean getFloat() {
-		Pattern pattern = Pattern.compile("(\\d+\\.\\d+([Ee]\\d+)?)[DG]?");
+		Pattern pattern = Pattern.compile("^(\\d+\\.\\d+([Ee]\\d+)?)[DG]?");
 		Matcher matcher = pattern.matcher(codeStr.substring(idx));
 		boolean matchFound = matcher.find();
 		

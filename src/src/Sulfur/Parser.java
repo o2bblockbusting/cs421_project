@@ -1,5 +1,7 @@
+package Sulfur;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
 
 public class Parser {
@@ -105,13 +107,13 @@ public class Parser {
 	// WHILE <condition> YET <block> ZENITH
 	private Expr.WhileStatement whileStmt() {
 		Expr condition = comparison1();
-		consume(TokenType.YET);
+		int lineNum = consume(TokenType.YET).line;
 		
 		Expr.StatementBlock innerBlock = block();
 		
 		consume(TokenType.ZENITH);
 		
-		return new Expr.WhileStatement(condition, innerBlock);
+		return new Expr.WhileStatement(condition, innerBlock, lineNum);
 	}
 	
 	//Detect if statement in the following forms 
@@ -119,20 +121,32 @@ public class Parser {
 	// IF <condition> YET <block> ZENITH ELSE YET <block> ZENITH
 	// IF <condition> YET <block> ZENITH ELSE IF <condition> YET <block> ZENITH ELSE YET <block> ZENITH
 	private Expr.IfStatement ifStmt() {
+		// List of all conditions (ifs and else ifs) and their corresponding code blocks
+		ArrayList<Expr.ConditionalBlock> conditionalBlocks = new ArrayList<>();
+		
+		// Add first if to list
 		Expr condition = comparison1();
-		consume(TokenType.YET);
+		int lineNum = consume(TokenType.YET).line;
 		
 		Expr.StatementBlock ifBlock = block();
+		conditionalBlocks.add(new Expr.ConditionalBlock(condition, ifBlock, lineNum));
 		
 		consume(TokenType.ZENITH);
 		
 		Expr.StatementBlock elseBlock = null;
-		if(match(TokenType.ELSE)) {
-			if(peek().type == TokenType.IF) {
-				//This will lead back to the ifStmt function eventually,
-				//  but it has to be a block so it is done in a roundabout way
-				elseBlock = block();
+		
+		while(match(TokenType.ELSE)) {
+			//Add else-if to conditionals list
+			if(match(TokenType.IF)) {
+				condition = comparison1();
+				lineNum = consume(TokenType.YET).line;
+				
+				ifBlock = block();
+				conditionalBlocks.add(new Expr.ConditionalBlock(condition, ifBlock, lineNum));
+				
+				consume(TokenType.ZENITH);
 			}
+			//Match final else block
 			else {
 				consume(TokenType.YET);
 				elseBlock = block();
@@ -140,9 +154,9 @@ public class Parser {
 			}
 		}
 		
-		return new Expr.IfStatement(condition, ifBlock, elseBlock);
+		return new Expr.IfStatement(conditionalBlocks, elseBlock);
 	}
-	private Expr.FunctionCall funcCall() {
+	private Expr funcCall() {
 		Token funcID = previous();
 		ArrayList<Expr> arguments = new ArrayList<Expr>();
 		consume(TokenType.LEFT_PAREN);
@@ -157,6 +171,10 @@ public class Parser {
 			
 			firstParam = false;
 		}
+		
+		if(funcID.type == TokenType.PRINT)
+			return new Expr.PrintStmt(arguments);
+		
 		return new Expr.FunctionCall(funcID, arguments);
 	}
 	
