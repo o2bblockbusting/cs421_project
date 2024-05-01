@@ -195,9 +195,9 @@ public class Parser {
 	}
 	
 	//<arr-id>~<func-name>(<arg1>, <arg2>, <arg3>...)
-	//arr~length()
-	//arr~get(0)
-	//arr~set(0)
+	//EX: arr~length()
+	//    arr~get(0)
+	//    arr~set(0)
 	private Expr arrayFunctionCall() {		
 		ArrayList<Expr> arguments = new ArrayList<Expr>();
 		Token arrIDTok = previous();

@@ -36,7 +36,7 @@ public class SymbolTable {
 	private boolean updateValue(String varName, Object value) {
 		if(vars.containsKey(varName)) {
 			if(value.getClass() != vars.get(varName).getClass()) {
-				
+				// Type checking disabled, for now
 			}
 			vars.replace(varName, value);
 			return true;

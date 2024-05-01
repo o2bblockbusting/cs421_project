@@ -19,6 +19,9 @@ public class Interpreter {
 		Object res = evaluate(rootExpr, globalSymTable);
 		checkForInvalidUsage(res, false);
 	}
+	
+	// Figures out what type of expression it is using an inefficient chain of if/elif statements
+	// Calls the corresponding method to run the method and returns the result
 	private Object evaluate(Expr expr, SymbolTable symTable) {
 		//System.out.println("EXPRESSION "+expr);
 		//System.out.println("SYMTABLE: "+symTable);
@@ -137,6 +140,14 @@ public class Interpreter {
 		return getTypeCheckedObj(res, funcExpr.returnType.type, expr.funcIdTok.line);
 	}
 	
+	// Array function calls are saved in a Expr.FunctionCall expression at parsing but are different because the method name always starts with ArrayList_
+	// These calls happen every time the property accessor (~) is used on an array
+	// EX:
+	// A arr N[]V {61}
+	// arr~add(42)
+	// arr~get(0)
+	// 
+	// These function calls all directly correspond to valid ArrayList methods
 	private Object evaluate_ArrayFunctionCall(Expr.FunctionCall expr, SymbolTable symTable) {
 		ArrayList<Object> args = new ArrayList<Object>();
 		for(Expr e : expr.arguments) {
@@ -150,7 +161,7 @@ public class Interpreter {
 		@SuppressWarnings("unchecked")
 		ArrayList<Object> list = (ArrayList<Object>) args.get(0);
 		
-		// Doesn't include array
+		// Argument count doesn't include array
 		int numExtraArgs = args.size() - 1;
 		int line = expr.funcIdTok.line;
 		
@@ -199,6 +210,7 @@ public class Interpreter {
 		return null;
 	}
 	
+	//Throws an error if expected argument length is not matched
 	private void checkArgLength(int numArgs, int expectedNum, int lineNum) {
 		if(numArgs != expectedNum) {
 			error("Expected "+expectedNum+" arguments but received "+numArgs, lineNum);

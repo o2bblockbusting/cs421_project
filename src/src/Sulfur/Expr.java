@@ -135,6 +135,8 @@ public abstract class Expr {
 		}
 	}
 	
+	//Used in if/else if statements
+	//Should not be used stand-alone
 	public static class ConditionalBlock extends Expr { 
 		final Expr condition;
 		final StatementBlock body;
@@ -187,6 +189,7 @@ public abstract class Expr {
 		}
 	}
 	
+	//Handles +, -, and casting
 	static class UnaryOp extends Expr {
 		final Token operator;
 		final Expr right;
@@ -233,6 +236,9 @@ public abstract class Expr {
 			return "GET ("+varIdTok.value+")";
 		}
 	}
+	
+	//Used as part of a function definition
+	//Should not be used stand-alone
 	public static class Parameter extends Expr {
 		final Token varType;
 		final Token varIdTok;
@@ -270,6 +276,7 @@ public abstract class Expr {
 			return "ASSIGN " + varIdTok.value + " "+ dataTypeTok.type + " VALUE " + value;
 		}
 	}
+	// Parenthesis
 	public static class Grouping extends Expr {
 		final Expr expression;
 

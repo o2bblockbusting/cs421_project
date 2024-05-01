@@ -1,5 +1,13 @@
 package Sulfur;
 
+/*
+ * This class would not need to exist if Java was dynamically typed, but it is not.
+ * This class handles all arithmetic/operators used on the various data types.
+ * It first uses the 'getResultType' method to ensure the operands are compatible and then chooses the highest order data type as the output.
+ * Then, each method casts both operands to the expected output type before performing the operation.
+ * This results in a very lengthy class, and I really wish there was a better way to do this.
+ */
+
 public class OperationPerformer {
 	
 	// Ensures that the two objects have compatible types for the operation
