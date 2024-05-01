@@ -292,7 +292,7 @@ public class OperationPerformer {
 		}
 	}
 	
-	private static double toDouble(Object obj) {
+	public static double toDouble(Object obj) {
 		if(obj instanceof Double) {
 			return (double) obj;
 		}
@@ -313,7 +313,7 @@ public class OperationPerformer {
 		}
 	}
 	
-	private static float toFloat(Object obj) {
+	public static float toFloat(Object obj) {
 		if(obj instanceof Double) {
 			return ((Double) obj).floatValue();
 		}
@@ -334,7 +334,7 @@ public class OperationPerformer {
 		}
 	}
 	
-	private static long toLong(Object obj) {
+	public static long toLong(Object obj) {
 		if(obj instanceof Double) {
 			return ((Double) obj).longValue();
 		}
@@ -355,7 +355,7 @@ public class OperationPerformer {
 		}
 	}
 	
-	private static int toInteger(Object obj) {
+	public static int toInteger(Object obj) {
 		if(obj instanceof Double) {
 			return ((Double) obj).intValue();
 		}
@@ -376,7 +376,7 @@ public class OperationPerformer {
 		}
 	}
 	
-	private static char toCharacter(Object obj) {
+	public static char toCharacter(Object obj) {
 		return (char) toInteger(obj);
 	}
 }

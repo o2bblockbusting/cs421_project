@@ -37,7 +37,10 @@ public class Parser {
 			} else if(match(TokenType.IF)) {
 				statements.add(ifStmt());
 			} else if(match(TokenType.IDENTIFIER, TokenType.PRINT)) {
-				statements.add(funcCall());
+				if(peek().type == TokenType.PROPERTY_ACCESSOR)
+					statements.add(arrayFunctionCall());
+				else
+					statements.add(funcCall());
 			} else if(match(TokenType.RETURN)) {
 				statements.add(new Expr.ReturnStmt(comparison1()));
 			} else if(match(TokenType.JUMP_OUT, TokenType.KONTINUE, TokenType.QUIT)) {
@@ -54,6 +57,7 @@ public class Parser {
 	// ASSIGN IDENTIFIER FUNCTION <return_type>? VALUE LEFT_PAREN <arguments>? RIGHT_PAREN YET <block> ZENITH
 	private Expr assignment() {
 		Token idTok = consume(TokenType.IDENTIFIER);
+		int arrayDegree = 0;
 		
 		if(match(TokenType.FUNCTION)) {
 			return functionDef(idTok);
@@ -64,10 +68,15 @@ public class Parser {
 		}
 		Token dataType = previous();
 		
+		while(match(TokenType.LEFT_BRACKET)) {
+			consume(TokenType.RIGHT_BRACKET);
+			arrayDegree++;
+		}
+		
 		consume(TokenType.VALUE);
 		Expr value = comparison1();
 		
-		return new Expr.Assign(idTok, dataType, value);
+		return new Expr.Assign(idTok, dataType, value, arrayDegree);
 	}
 	
 	// Called by the assignment() function and starts pointing to the <return_type>
@@ -93,8 +102,14 @@ public class Parser {
 				error(peek(),"Expected data type");
 			}
 			Token dataType = previous();
+			int arrayDegree = 0;
+			while(match(TokenType.LEFT_BRACKET)) {
+				consume(TokenType.RIGHT_BRACKET);
+				arrayDegree++;
+			}
+			
 			consume(TokenType.IDENTIFIER);
-			params.add(new Expr.Parameter(dataType, previous()));
+			params.add(new Expr.Parameter(dataType, previous(), arrayDegree));
 		}
 		
 		consume(TokenType.YET);
@@ -156,6 +171,7 @@ public class Parser {
 		
 		return new Expr.IfStatement(conditionalBlocks, elseBlock);
 	}
+	// <identifier> (<arg1>, <arg2>, <arg3>...)
 	private Expr funcCall() {
 		Token funcID = previous();
 		ArrayList<Expr> arguments = new ArrayList<Expr>();
@@ -176,6 +192,37 @@ public class Parser {
 			return new Expr.PrintStmt(arguments);
 		
 		return new Expr.FunctionCall(funcID, arguments);
+	}
+	
+	//<arr-id>~<func-name>(<arg1>, <arg2>, <arg3>...)
+	//arr~length()
+	//arr~get(0)
+	//arr~set(0)
+	private Expr arrayFunctionCall() {		
+		ArrayList<Expr> arguments = new ArrayList<Expr>();
+		Token arrIDTok = previous();
+		arguments.add(new Expr.VariableAccess(arrIDTok));
+		
+		consume(TokenType.PROPERTY_ACCESSOR);
+		Token funcTok = consume(TokenType.IDENTIFIER);
+		
+		//Switch function name to include ArrayList so it doesn't conflict with similar user created functions
+		//User functions also cannot have capital letters so there should be no conflicts
+		Token arrayFuncTok = new Token(funcTok.type, "ArrayList_"+((String) funcTok.value), funcTok.line);
+		consume(TokenType.LEFT_PAREN);
+		
+		boolean firstParam = true;
+		while(!match(TokenType.RIGHT_PAREN)) {
+			if(!firstParam) {
+				consume(TokenType.SEPARATOR);
+			}
+			
+			arguments.add(comparison1());
+			
+			firstParam = false;
+		}
+		
+		return new Expr.FunctionCall(arrayFuncTok, arguments);
 	}
 	
 	// Rule: comparison1 → comparison2 ( "|" comparison2 )*
@@ -261,9 +308,29 @@ public class Parser {
 			return new Expr.Literal(previous().value);
 		}
 		
+		if(match(TokenType.LEFT_BRACE)) {
+			ArrayList<Expr> list = new ArrayList<Expr>();
+			boolean first = true;
+			
+			while(!match(TokenType.RIGHT_BRACE)) {
+				if(first) {
+					first = false;
+				}
+				else {
+					consume(TokenType.SEPARATOR);
+				}
+				list.add(comparison1());
+			}
+			
+			return new Expr.ValueArray(list);
+		}
+		
 		if (match(TokenType.IDENTIFIER)) {
 			if(peek().type == TokenType.LEFT_PAREN) {
 				return funcCall();
+			}
+			else if(peek().type == TokenType.PROPERTY_ACCESSOR) {
+				return arrayFunctionCall();
 			}
 			return new Expr.VariableAccess(previous());
 		}

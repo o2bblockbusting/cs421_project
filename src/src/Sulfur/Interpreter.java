@@ -1,5 +1,7 @@
 package Sulfur;
 
+import java.util.ArrayList;
+
 public class Interpreter {
 	Expr rootExpr;
 	SymbolTable globalSymTable;
@@ -56,6 +58,9 @@ public class Interpreter {
 		else if(expr instanceof Expr.Literal) {
 			return ((Expr.Literal) expr).value;
 		}
+		else if(expr instanceof Expr.ValueArray) {
+			return evaluate_ValueArray((Expr.ValueArray) expr, symTable);
+		}
 		else if(expr instanceof Expr.VariableAccess) {
 			return evaluate_VariableAccess((Expr.VariableAccess) expr, symTable);
 		}
@@ -84,8 +89,13 @@ public class Interpreter {
 	}
 	
 	private Object evaluate_FunctionCall(Expr.FunctionCall expr, SymbolTable symTable) {
-		// Find function in symbol table
+		// Get name and check if it is an ArrayList function
 		String funcName = expr.funcIdTok.value.toString();
+		if(funcName.startsWith("ArrayList")) {
+			return evaluate_ArrayFunctionCall(expr, symTable);
+		}
+		
+		// Find function in symbol table		
 		Object func = symTable.getValue(expr.funcIdTok);
 		if(!(func instanceof Expr.FunctionDef)) {
 			error("Attempted to run function "+funcName+" but found a variable of type "+func.getClass().getSimpleName()+" instead", expr.funcIdTok.line);
@@ -102,12 +112,19 @@ public class Interpreter {
 		//Check argument types against parameter types
 		for(int i=0; i<expr.arguments.size(); i++) {
 			//Get each argument and its matching parameter
-			Object arg = expr.arguments.get(i);
+			Object arg = evaluate(expr.arguments.get(i), symTable);
 			Expr.Parameter param = funcExpr.parameters.get(i);
 			TokenType paramType = param.varType.type;
 			
 			//After double checking it is the right type, add it to the symbol table
-			Object checkedArg = getTypeCheckedObj(arg, paramType, expr.funcIdTok.line);
+			Object checkedArg = arg;
+			if(param.arrayDegree == 0) {
+				checkedArg = getTypeCheckedObj(arg, paramType, expr.funcIdTok.line);
+			}
+			else if(!arg.getClass().getName().equals(ArrayList.class.getName())) {
+				error("Cannot assign non-array value to array parameter",param.varIdTok.line);
+			}
+				
 			funcSymTable.setValue((String) param.varIdTok.value, checkedArg);
 		}
 		
@@ -118,6 +135,74 @@ public class Interpreter {
 			return null;
 		
 		return getTypeCheckedObj(res, funcExpr.returnType.type, expr.funcIdTok.line);
+	}
+	
+	private Object evaluate_ArrayFunctionCall(Expr.FunctionCall expr, SymbolTable symTable) {
+		ArrayList<Object> args = new ArrayList<Object>();
+		for(Expr e : expr.arguments) {
+			args.add(evaluate(e, symTable));
+		}
+		
+		// First argument should always be the array
+		if(!args.get(0).getClass().getName().equals(ArrayList.class.getName())) {
+			error("Expected array", expr.funcIdTok.line);
+		}
+		@SuppressWarnings("unchecked")
+		ArrayList<Object> list = (ArrayList<Object>) args.get(0);
+		
+		// Doesn't include array
+		int numExtraArgs = args.size() - 1;
+		int line = expr.funcIdTok.line;
+		
+		switch((String) expr.funcIdTok.value) {
+		case "ArrayList_size":
+		case "ArrayList_length":
+			checkArgLength(numExtraArgs, 0, line);
+			return list.size();
+			
+		case "ArrayList_get":
+			checkArgLength(numExtraArgs, 1, line);
+			Integer index = (Integer) getTypeCheckedObj(args.get(1), TokenType.INTEGER_T, line);
+			return list.get(index);
+		case "ArrayList_set":
+			checkArgLength(numExtraArgs, 1, line);
+			Integer idx = (Integer) getTypeCheckedObj(args.get(1), TokenType.INTEGER_T, line);
+			return list.set(idx, args.get(2));
+		case "ArrayList_clone":
+			checkArgLength(numExtraArgs, 0, line);
+			return list.clone();
+		case "ArrayList_indexof":	
+			checkArgLength(numExtraArgs, 1, line);
+			return list.indexOf(args.get(1));
+		case "ArrayList_contains":	
+			checkArgLength(numExtraArgs, 1, line);
+			return list.contains(args.get(1));
+		case "ArrayList_remove":
+			checkArgLength(numExtraArgs, 1, line);
+			Integer idx2 = (Integer) getTypeCheckedObj(args.get(1), TokenType.INTEGER_T, line);
+			return list.remove(idx2);
+		case "ArrayList_add":
+			if(numExtraArgs == 2) {
+				Integer insertIdx = (Integer) getTypeCheckedObj(args.get(1), TokenType.INTEGER_T, line);
+				list.add(insertIdx, args.get(2));
+				return true;
+			}
+			checkArgLength(numExtraArgs, 1, line);
+			return list.add(args.get(1));
+		case "ArrayList_clear":
+			checkArgLength(numExtraArgs, 0, line);
+			list.clear();
+			break;
+		default:
+			error("Unrecognized array method "+expr.funcIdTok.value, line);
+		}
+		return null;
+	}
+	
+	private void checkArgLength(int numArgs, int expectedNum, int lineNum) {
+		if(numArgs != expectedNum) {
+			error("Expected "+expectedNum+" arguments but received "+numArgs, lineNum);
+		}
 	}
 	
 	private Object evaluate_PrintStmt(Expr.PrintStmt expr, SymbolTable symTable) {
@@ -163,6 +248,9 @@ public class Interpreter {
 	}
 	
 	private Object evaluate_FlowControlStmt(Expr.FlowControlStmt expr, SymbolTable symTable) {
+		if(expr.ctrlTok.type == TokenType.QUIT) {
+			System.exit(0);
+		}
 		return expr.ctrlTok.type;
 	}
 	
@@ -243,6 +331,33 @@ public class Interpreter {
 		case NOT:
 			if(o instanceof Boolean) return !(Boolean) o;
 			error("Cannot use not operator on object of type "+o.getClass().getSimpleName(), expr.operator.line);
+		// HANDLE CASTING
+		case DOUBLE_T:
+			return OperationPerformer.toDouble(o);
+		case FLOAT_T:
+			return OperationPerformer.toFloat(o);
+		case LONG_T:
+			return OperationPerformer.toLong(o);
+		case INTEGER_T:
+			return OperationPerformer.toInteger(o);
+		case CHARACTER_T:
+			return OperationPerformer.toCharacter(o);
+		case STRING_T:
+			return o.toString();
+		case BOOLEAN_T:
+			if(o instanceof String) {
+				return ((String) o).length() > 0;
+			}
+			else if(o instanceof Boolean) {
+				return o;
+			}
+			else if(o.getClass().isArray()) {
+				error("Cannot cast array to boolean", expr.operator.line);
+			}
+			else {
+				//Any non-zero number is true
+				return ((Integer) OperationPerformer.toInteger(o)).intValue() != 0;
+			}
 		default:
 			error("Unrecognized unary operator type "+t, expr.operator.line);
 		}
@@ -254,12 +369,29 @@ public class Interpreter {
 	}
 	
 	private Object evaluate_Assign(Expr.Assign expr, SymbolTable symTable) {
-		symTable.setValue((String) expr.varIdTok.value, evaluate(expr.value, symTable));
+		Object value = evaluate(expr.value, symTable);
+		//Don't bother checking the type of arrays, its too much of a hassle
+		if(expr.arrayDegree == 0)
+			value = getTypeCheckedObj(value, expr.dataTypeTok.type, expr.varIdTok.line);
+		else if(!value.getClass().getName().equals(ArrayList.class.getName())) {
+			error("Cannot assign non-array value to array variable",expr.varIdTok.line);
+		}
+		
+		symTable.setValue((String) expr.varIdTok.value, value);
 		return null;
 	}
 	
 	private Object evaluate_Grouping(Expr.Grouping expr, SymbolTable symTable) {
 		return evaluate(expr.expression, symTable);
+	}
+	
+	private Object evaluate_ValueArray(Expr.ValueArray expr, SymbolTable symTable) {
+		ArrayList<Object> resultArray = new ArrayList<Object>();
+		
+		for(Expr e : expr.value) {
+			resultArray.add(evaluate(e, symTable));
+		}
+		return resultArray;
 	}
 	
 	//Checks to see if an object matches the expected type or can automatically be casted to the correct type
@@ -284,6 +416,8 @@ public class Interpreter {
 		case BOOLEAN_T:
 			if(o instanceof Boolean) return (Boolean) o;
 			break;
+		case FUNCTION:
+			if(o instanceof Expr.FunctionDef) return o;
 		default:
 			break;
 		}

@@ -213,6 +213,15 @@ public abstract class Expr {
 			return "LITERAL ("+value.getClass().getSimpleName()+":"+value+")";
 		}
 	}
+	
+	public static class ValueArray extends Expr {
+		final ArrayList<Expr> value;
+		
+		ValueArray(ArrayList<Expr> value) {
+			this.value = value;
+		}
+	}
+	
 	public static class VariableAccess extends Expr {
 		final Token varIdTok;
 	    
@@ -227,10 +236,12 @@ public abstract class Expr {
 	public static class Parameter extends Expr {
 		final Token varType;
 		final Token varIdTok;
+		final int arrayDegree;
 		
-		Parameter(Token varType, Token varIdTok) {
+		Parameter(Token varType, Token varIdTok, int arrayDegree) {
 	      this.varIdTok = varIdTok;
 	      this.varType = varType;
+	      this.arrayDegree = arrayDegree;
 	    }
 		@Override
 		public String toString() {
@@ -242,11 +253,16 @@ public abstract class Expr {
 		final Token varIdTok;
 		final Token dataTypeTok;
 		final Expr value;
+		final int arrayDegree;
 		
-	    Assign(Token varIdTok, Token dataTypeTok, Expr value) {
+	    Assign(Token varIdTok, Token dataTypeTok, Expr value, int arrayDegree) {
 	      this.varIdTok = varIdTok;
 	      this.value = value;
 	      this.dataTypeTok = dataTypeTok;
+	      this.arrayDegree = arrayDegree;
+	      if(arrayDegree > 1) {
+	    	  throw new RuntimeException("Line "+dataTypeTok.line+": Multidimensional arrays NYI");
+	      }
 	    }
 	   
 	    @Override

@@ -1,30 +1,19 @@
-M# Arrays of various types are created as shown #M
+M# Arrays of various types are created as shown 
+   On the backend  #M
+A arr N[]V{52,27,36}
+A arr_2 N[]V{}
+A arr_3 C[]V{'a','b','c'}
 
-M# Array of size 3 created with three integers in it #M
-AarrN[]V{52,27,36}
-
-M# Array of size 5 is created with nothing in it. 
-Values are initialized to zero #M
-Aarr_2N[5]V{}
-
-M# Only 3 out of 10 values are provided, so the remaining values default to 0 #M
-Aarr_3C[10]V{'a','b','c'}
-
-M# Copies values from src into dest #M
-AcopyFV(N[]src,N[]dst)Y
-
-M# Ensure length does not go out of bounds #M
-AlenNVsrc~length
-Ilen>dst~lengthY
-AlenNVdst~length
+M# Adds all values from src to dest #M
+A add_all FV (N[]src,N[]dst) Y
+    A idx NV 0
+    W idx<src~length() Y
+        dst~add(src~get(idx))
+        A idx NV idx+1
+    Z
 Z
 
-AidxNV0
-Widx<lenY
-Adst[idx]NVsrc[idx]
-Z
-
-Z
-
-copy(arr,arr_2)
-P(arr_2[2])
+add_all(arr,arr_2)
+P("arr: ",arr,'\n')
+P("arr_2: ",arr_2,'\n')
+P("arr_3: ",arr_3,'\n')

@@ -1,22 +1,12 @@
-AnumNV2
+AnumCV'A'
+P('A'*2.0,'\n')
 
-Wnum<100Y
-Ais_primeBVT
-AdivisorNV2
+P("Cast: ",(B)'\0','\n')
 
-Wdivisor<numY
+AaddFLV(Na,Nb)Y Ra+b Z
 
-Inum%divisor=2Y
-Ais_primeBVU
-J
+A int_wrapper FNV(Ffunc,Na,Nb) Y
+  R (N) func(a,b) 
 Z
-
-AdivisorNVdivisor+1
-Z
-
-Iis_primeY
-P(num)
-P("\n")
-Z
-AnumNVnum+1
-Z
+P(add(5,32),'\n')
+P(int_wrapper(add,6,7),'\n')

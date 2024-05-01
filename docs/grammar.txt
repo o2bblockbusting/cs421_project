@@ -2,9 +2,9 @@ program        → block
 
 block          → statement+
 
-statement      → assignment | while | if | function_call | print | return | break | continue | quit
+statement      → assignment | while | if | function_call | print | array_func_call | return | break | continue | quit
 
-assignment	   → ("A" IDENTIFIER TYPE "V" comparison1) | function_def
+assignment	   → ("A" IDENTIFIER TYPE ("[]")? "V" comparison1) | function_def
 
 function_def   → "A" IDENTIFIER "F" TYPE? "V(" (TYPE IDENTIFIER)? ("," TYPE IDENTIFIER)* ")Y" block "Z"
 
@@ -13,6 +13,8 @@ while          → "W" comparison1 "Y" block "Z"
 if             → "I" comparison1 "Y" block "Z" ("E" (if | "Y" block "Z"))?
 
 function_call  → IDENTIFIER "(" (comparison1)? ("," comparison1)* ")"
+
+array_func_call→ IDENTIFIER "~" IDENTIFIER "(" (comparison1)? ("," comparison1)* ")"
 
 print          → "P(" (comparison1)? ("," comparison1)* ")"
 
@@ -38,7 +40,7 @@ factor         → unary ( ( "/" | "*" | "%") unary )* ;
 
 unary          → ("-" | "+" | "!") unary | primary ;
 
-primary        → NUMBER | IDENTIFIER | "( cast_type )" | "(" expression ")" ;
+primary        → NUMBER | IDENTIFIER | function_call | array_func_call | "( cast_type )" | "(" expression ")" ;
 
 
 

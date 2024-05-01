@@ -9,7 +9,9 @@ public class Main {
 	public static void main(String[] args) {
 		StringBuilder code = new StringBuilder();
 		//File f = new File("C:\\Users\\pc\\vscode-workspace\\CS421\\cs421_project\\example\\helloworld.suf");
-		File f = new File("C:\\Users\\pc\\vscode-workspace\\CS421\\cs421_project\\example\\primefinder.suf");
+		//File f = new File("C:\\Users\\pc\\vscode-workspace\\CS421\\cs421_project\\example\\primefinder.suf");
+		//File f = new File("C:\\Users\\pc\\vscode-workspace\\CS421\\cs421_project\\example\\test.suf");
+		File f = new File("C:\\Users\\pc\\vscode-workspace\\CS421\\cs421_project\\example\\array.suf");
 		//File f = new File("C:\\Users\\pc\\vscode-workspace\\CS421\\cs421_project\\example\\function.suf");
 		//File f = new File("C:\\Users\\pc\\vscode-workspace\\CS421\\cs421_project\\example\\comment.suf");
 		Scanner scan;
